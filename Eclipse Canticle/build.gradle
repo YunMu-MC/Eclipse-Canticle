@@ -1,0 +1,489 @@
+plugins {
+    id 'fabric-loom' version '1.4-SNAPSHOT'
+    id 'maven-publish'
+    id 'java'
+}
+
+// 基础版本配置
+version = project.mod_version
+group = project.maven_group
+
+base {
+    archivesName = project.archives_base_name
+}
+
+// Java 版本配置 - Minecraft 1.20.1 需要 Java 17
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+    withSourcesJar()
+}
+
+// 仓库配置
+repositories {
+    // Maven 中央仓库
+    mavenCentral()
+
+    // Fabric 官方仓库
+    maven {
+        name = 'Fabric'
+        url = 'https://maven.fabricmc.net/'
+    }
+
+    // Shedaniel 的仓库 (用于一些 Fabric 扩展)
+    maven {
+        name = 'Shedaniel'
+        url = 'https://maven.shedaniel.me/'
+    }
+
+    // TerraformersMC 仓库 (用于一些工具库)
+    maven {
+        name = 'TerraformersMC'
+        url = 'https://maven.terraformersmc.com/releases/'
+    }
+
+    // Modrinth Maven (备用)
+    maven {
+        name = 'Modrinth'
+        url = 'https://api.modrinth.com/maven'
+    }
+
+    // CurseMaven (备用)
+    maven {
+        name = 'CurseMaven'
+        url = 'https://cursemaven.com'
+    }
+
+    // Jitpack (用于一些 GitHub 项目)
+    maven {
+        name = 'Jitpack'
+        url = 'https://jitpack.io'
+    }
+}
+
+// Loom 配置
+loom {
+    // 分离运行配置
+    splitEnvironmentSourceSets()
+
+    // 启用访问增宽器（用于访问 Minecraft 的包私有/私有成员）
+    accessWidenerPath = file("src/main/resources/eclipsecanticle.accesswidener")
+
+    // Mixin 配置
+    mixin {
+        defaultRefmapName = "eclipsecanticle.refmap.json"
+    }
+
+    // 运行配置
+    runs {
+        // 客户端
+        client {
+            client()
+            configName = "Fabric Client"
+            ideConfigGenerated(true)
+            runDir = "run/client"
+
+            // JVM 参数优化
+            vmArgs(
+                    "-Xmx4G",
+                    "-Xms2G",
+                    "-XX:+UseG1GC",
+                    "-XX:+ParallelRefProcEnabled",
+                    "-XX:MaxGCPauseMillis=200",
+                    "-XX:+UnlockExperimentalVMOptions",
+                    "-XX:+DisableExplicitGC",
+                    "-XX:+AlwaysPreTouch",
+                    "-XX:G1NewSizePercent=30",
+                    "-XX:G1MaxNewSizePercent=40",
+                    "-XX:G1HeapRegionSize=8M",
+                    "-XX:G1ReservePercent=20",
+                    "-XX:G1HeapWastePercent=5",
+                    "-XX:G1MixedGCCountTarget=4",
+                    "-XX:InitiatingHeapOccupancyPercent=15",
+                    "-XX:G1MixedGCLiveThresholdPercent=90",
+                    "-XX:G1RSetUpdatingPauseTimePercent=5",
+                    "-XX:SurvivorRatio=32",
+                    "-XX:+PerfDisableSharedMem",
+                    "-XX:MaxTenuringThreshold=1"
+            )
+
+            // 程序参数
+            programArgs("--username", "DevPlayer", "--uuid", "00000000-0000-0000-0000-000000000000")
+        }
+
+        // 服务端
+        server {
+            server()
+            configName = "Fabric Server"
+            ideConfigGenerated(true)
+            runDir = "run/server"
+
+            // JVM 参数优化（服务端）
+            vmArgs(
+                    "-Xmx4G",
+                    "-Xms2G",
+                    "-XX:+UseG1GC",
+                    "-XX:+ParallelRefProcEnabled",
+                    "-XX:MaxGCPauseMillis=200",
+                    "-XX:+UnlockExperimentalVMOptions",
+                    "-XX:+DisableExplicitGC",
+                    "-XX:+AlwaysPreTouch",
+                    "-XX:G1NewSizePercent=40",
+                    "-XX:G1MaxNewSizePercent=50",
+                    "-XX:G1HeapRegionSize=16M",
+                    "-XX:G1ReservePercent=15",
+                    "-XX:G1HeapWastePercent=5",
+                    "-XX:G1MixedGCCountTarget=3",
+                    "-XX:InitiatingHeapOccupancyPercent=10",
+                    "-XX:G1MixedGCLiveThresholdPercent=90",
+                    "-XX:G1RSetUpdatingPauseTimePercent=5",
+                    "-XX:SurvivorRatio=32",
+                    "-XX:+PerfDisableSharedMem",
+                    "-XX:MaxTenuringThreshold=1",
+                    "-Dusing.aikars.flags=https://mcflags.emc.gs",
+                    "-Daikars.new.flags=true"
+            )
+        }
+
+        // 数据生成运行配置
+        datagen {
+            inherit server
+            configName = "Data Generation"
+
+            vmArg "-Dfabric-api.datagen"
+            vmArg "-Dfabric-api.datagen.output-dir=${file("src/main/generated")}"
+            vmArg "-Dfabric-api.datagen.modid=eclipsecanticle"
+
+            runDir = "run/datagen"
+        }
+    }
+}
+
+// 源集配置
+sourceSets {
+    main {
+        resources {
+            srcDirs += [
+                    'src/main/generated'
+            ]
+        }
+    }
+}
+
+// 依赖配置
+dependencies {
+    // Minecraft 和 Fabric 核心依赖
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+
+    // Fabric API - 完整版本
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+
+    // Fabric Language Kotlin (如果需要 Kotlin 支持，可选)
+    // modImplementation "net.fabricmc:fabric-language-kotlin:${project.fabric_kotlin_version}"
+
+    // === 开发工具和调试 ===
+
+    // Mod Menu - 模组菜单（推荐但可选）
+    modImplementation "com.terraformersmc:modmenu:${project.modmenu_version}"
+
+    // Cloth Config - 配置界面 API（可选）
+    modApi("me.shedaniel.cloth:cloth-config-fabric:${project.cloth_config_version}") {
+        exclude(group: "net.fabricmc.fabric-api")
+    }
+
+    // REI (Roughly Enough Items) - 物品查询（开发时有用，可选）
+    // modCompileOnly "me.shedaniel:RoughlyEnoughItems-api-fabric:${project.rei_version}"
+    // modRuntimeOnly "me.shedaniel:RoughlyEnoughItems-fabric:${project.rei_version}"
+
+    // === 性能和优化库 ===
+
+    // Caffeine - 高性能缓存库
+    implementation "com.github.ben-manes.caffeine:caffeine:3.1.8"
+    include "com.github.ben-manes.caffeine:caffeine:3.1.8"
+
+    // FastUtil - 高性能集合库
+    implementation "it.unimi.dsi:fastutil:8.5.12"
+    include "it.unimi.dsi:fastutil:8.5.12"
+
+    // Gson - JSON 解析（Minecraft 已包含，但显式声明版本）
+    implementation "com.google.code.gson:gson:2.10.1"
+
+    // Guava - 通用工具库（Minecraft 已包含）
+    implementation "com.google.guava:guava:32.1.3-jre"
+
+    // === 网络和序列化 ===
+
+    // Netty - 网络通信（Minecraft 已包含，但用于参考）
+    // compileOnly "io.netty:netty-all:4.1.97.Final"
+
+    // === 数学和算法库 ===
+
+    // Apache Commons Math - 数学工具
+    implementation "org.apache.commons:commons-math3:3.6.1"
+    include "org.apache.commons:commons-math3:3.6.1"
+
+    // JOML - Java OpenGL 数学库（用于向量和矩阵运算）
+    // Minecraft 1.20.1+ 已包含 JOML
+    compileOnly "org.joml:joml:1.10.5"
+
+    // === 日志和调试 ===
+
+    // SLF4J 和 Log4j（Minecraft 已包含）
+    compileOnly "org.apache.logging.log4j:log4j-api:2.20.0"
+    compileOnly "org.apache.logging.log4j:log4j-core:2.20.0"
+
+    // === 数据和配置 ===
+
+    // SnakeYAML - YAML 解析（可选，用于配置文件）
+    implementation "org.yaml:snakeyaml:2.2"
+    include "org.yaml:snakeyaml:2.2"
+
+    // TOML4J - TOML 解析（可选）
+    // implementation "com.moandjiezana.toml:toml4j:0.7.2"
+    // include "com.moandjiezana.toml:toml4j:0.7.2"
+
+    // === 注解处理 ===
+
+    // JetBrains Annotations - 代码注解
+    compileOnly "org.jetbrains:annotations:24.1.0"
+
+    // === 测试依赖 ===
+
+    // JUnit 5
+    testImplementation "org.junit.jupiter:junit-jupiter:5.10.1"
+    testRuntimeOnly "org.junit.platform:junit-platform-launcher"
+
+    // Mockito - 模拟测试
+    testImplementation "org.mockito:mockito-core:5.7.0"
+    testImplementation "org.mockito:mockito-junit-jupiter:5.7.0"
+
+    // AssertJ - 流式断言
+    testImplementation "org.assertj:assertj-core:3.24.2"
+}
+
+// 编译任务配置
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = 17
+
+    // 启用所有警告
+    options.compilerArgs << '-Xlint:all'
+    options.compilerArgs << '-Xlint:-processing'
+    options.compilerArgs << '-Xlint:-serial'
+
+    // 为参数名保留调试信息
+    options.compilerArgs << '-parameters'
+}
+
+// 测试任务配置
+test {
+    useJUnitPlatform()
+
+    testLogging {
+        events "passed", "skipped", "failed"
+        exceptionFormat "full"
+        showStandardStreams = false
+    }
+
+    // 测试 JVM 参数
+    jvmArgs(
+            "-Xmx2G",
+            "-XX:+UseG1GC"
+    )
+}
+
+// JAR 任务配置
+jar {
+    from("LICENSE") {
+        rename { "${it}_${project.archivesBaseName}" }
+    }
+
+    manifest {
+        attributes(
+                'Specification-Title': project.mod_name,
+                'Specification-Vendor': project.mod_author,
+                'Specification-Version': '1',
+                'Implementation-Title': project.name,
+                'Implementation-Version': project.version,
+                'Implementation-Vendor': project.mod_author,
+                'Built-On-Java': "${System.getProperty('java.vm.version')} (${System.getProperty('java.vm.vendor')})",
+                'Build-Time': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        )
+    }
+}
+
+// 处理资源任务
+processResources {
+    // 定义需要扩展的属性
+    def expandProps = [
+            'version': project.version,
+            'minecraft_version': project.minecraft_version,
+            'fabric_loader_version': project.loader_version,
+            'fabric_api_version': project.fabric_version,
+            'mod_id': project.mod_id,
+            'mod_name': project.mod_name,
+            'mod_description': project.mod_description,
+            'mod_author': project.mod_author,
+            'mod_license': project.mod_license
+    ]
+
+    inputs.properties(expandProps)
+
+    filesMatching('fabric.mod.json') {
+        expand expandProps
+    }
+
+    // 确保生成的文件不会被缓存
+    outputs.upToDateWhen { false }
+}
+
+// 确保 JAR 包含所有必要的资源
+tasks.named('jar', Jar) {
+    from('LICENSE') {
+        rename { "${it}_${project.mod_id}" }
+    }
+
+    // 包含 Access Widener
+    from('src/main/resources') {
+        include 'eclipsecanticle.accesswidener'
+    }
+}
+
+// 源代码 JAR 配置
+java {
+    withSourcesJar()
+}
+
+// 发布配置
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+
+            pom {
+                name = project.mod_name
+                description = project.mod_description
+                url = 'https://github.com/yourusername/eclipse-canticle'
+
+                licenses {
+                    license {
+                        name = project.mod_license
+                        url = 'https://opensource.org/licenses/MIT'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id = 'yourusername'
+                        name = project.mod_author
+                        email = 'your.email@example.com'
+                    }
+                }
+
+                scm {
+                    connection = 'scm:git:git://github.com/yourusername/eclipse-canticle.git'
+                    developerConnection = 'scm:git:ssh://github.com/yourusername/eclipse-canticle.git'
+                    url = 'https://github.com/yourusername/eclipse-canticle'
+                }
+            }
+        }
+    }
+
+    repositories {
+        // 发布到本地 Maven 仓库（测试用）
+        mavenLocal()
+
+        // 发布到远程仓库（需要配置）
+        // maven {
+        //     name = "MyMavenRepo"
+        //     url = uri("https://maven.example.com/releases")
+        //     credentials {
+        //         username = project.findProperty("maven.username") ?: System.getenv("MAVEN_USERNAME")
+        //         password = project.findProperty("maven.password") ?: System.getenv("MAVEN_PASSWORD")
+        //     }
+        // }
+    }
+}
+
+// 清理任务增强
+clean {
+    delete 'run'
+    delete 'logs'
+    delete '.gradle'
+    delete 'build'
+}
+
+// 自定义任务：生成开发环境
+tasks.register('setupDecompWorkspace') {
+    group = 'eclipse canticle'
+    description = '设置反编译工作空间'
+
+    dependsOn 'genSources'
+
+    doLast {
+        println '开发环境设置完成！'
+        println '使用 ./gradlew runClient 启动客户端'
+        println '使用 ./gradlew runServer 启动服务端'
+        println '使用 ./gradlew runDatagen 生成数据'
+    }
+}
+
+// 自定义任务：快速构建
+tasks.register('quickBuild') {
+    group = 'eclipse canticle'
+    description = '快速构建（跳过测试）'
+
+    dependsOn 'clean', 'build'
+
+    tasks.findByName('build').mustRunAfter 'clean'
+
+    doFirst {
+        tasks.test.enabled = false
+    }
+
+    doLast {
+        println "构建完成！JAR 文件位于: build/libs/"
+    }
+}
+
+// 自定义任务：完整构建
+tasks.register('fullBuild') {
+    group = 'eclipse canticle'
+    description = '完整构建（包含测试和文档）'
+
+    dependsOn 'clean', 'test', 'build', 'sourcesJar'
+
+    doLast {
+        println "完整构建完成！"
+        println "JAR: build/libs/${project.archivesBaseName}-${project.version}.jar"
+        println "Sources: build/libs/${project.archivesBaseName}-${project.version}-sources.jar"
+    }
+}
+
+// 自定义任务：版本信息
+tasks.register('versionInfo') {
+    group = 'eclipse canticle'
+    description = '显示版本信息'
+
+    doLast {
+        println "========================================="
+        println "Eclipse Canticle Mod - 版本信息"
+        println "========================================="
+        println "Mod 版本: ${project.version}"
+        println "Minecraft 版本: ${project.minecraft_version}"
+        println "Fabric Loader: ${project.loader_version}"
+        println "Fabric API: ${project.fabric_version}"
+        println "Yarn 映射: ${project.yarn_mappings}"
+        println "Java 版本: ${JavaVersion.current()}"
+        println "Gradle 版本: ${gradle.gradleVersion}"
+        println "========================================="
+    }
+}
+
+// Gradle 版本验证
+wrapper {
+    gradleVersion = '8.4'
+    distributionType = Wrapper.DistributionType.ALL
+}

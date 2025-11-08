@@ -1,0 +1,162 @@
+// ==========================================
+// Eclipse Canticle Mod - Settings
+// ==========================================
+
+// 插件管理仓库
+pluginManagement {
+    repositories {
+        // Gradle 插件门户
+        gradlePluginPortal()
+
+        // Fabric 仓库（用于 fabric-loom）
+        maven {
+            name = 'Fabric'
+            url = 'https://maven.fabricmc.net/'
+        }
+
+        // 镜像仓库（中国大陆用户可以使用阿里云镜像加速，可选）
+        // maven {
+        //     name = 'Aliyun Gradle Plugin'
+        //     url = 'https://maven.aliyun.com/repository/gradle-plugin'
+        // }
+    }
+
+    // 插件版本管理（可选，用于集中管理插件版本）
+    plugins {
+        id 'fabric-loom' version '1.4-SNAPSHOT'
+        id 'maven-publish'
+        id 'java'
+    }
+}
+
+// 依赖解析管理
+dependencyResolutionManagement {
+    // 仓库模式配置
+    // PREFER_PROJECT: 优先使用项目中定义的仓库
+    // PREFER_SETTINGS: 优先使用此文件中定义的仓库
+    // FAIL_ON_PROJECT_REPOS: 禁止在项目中定义仓库
+    repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)
+
+    // 全局仓库配置（可选，如果使用 PREFER_SETTINGS 模式）
+    // repositories {
+    //     mavenCentral()
+    //     maven {
+    //         name = 'Fabric'
+    //         url = 'https://maven.fabricmc.net/'
+    //     }
+    // }
+
+    // 版本目录（用于集中管理依赖版本，可选）
+    versionCatalogs {
+        // 可以定义版本目录来统一管理依赖
+        // libs {
+        //     version('minecraft', '1.20.1')
+        //     version('fabric-loader', '0.15.11')
+        //     version('fabric-api', '0.92.2+1.20.1')
+        //
+        //     library('minecraft', 'com.mojang', 'minecraft').versionRef('minecraft')
+        //     library('fabric-loader', 'net.fabricmc', 'fabric-loader').versionRef('fabric-loader')
+        //     library('fabric-api', 'net.fabricmc.fabric-api', 'fabric-api').versionRef('fabric-api')
+        // }
+    }
+}
+
+// ==========================================
+// 项目设置
+// ==========================================
+
+// 根项目名称（生成的 JAR 文件会使用此名称）
+rootProject.name = 'eclipse-canticle'
+
+// ==========================================
+// 多项目构建配置（如果项目有多个子模块，可选）
+// ==========================================
+
+// 如果你的 mod 有多个子模块，可以在这里包含它们
+// 例如：核心模块、API 模块、客户端模块等
+
+// include 'eclipse-canticle-core'
+// include 'eclipse-canticle-api'
+// include 'eclipse-canticle-client'
+
+// 子项目目录配置（可选）
+// project(':eclipse-canticle-core').projectDir = file('modules/core')
+// project(':eclipse-canticle-api').projectDir = file('modules/api')
+// project(':eclipse-canticle-client').projectDir = file('modules/client')
+
+// ==========================================
+// 构建缓存配置（提高构建速度）
+// ==========================================
+
+buildCache {
+    // 本地构建缓存
+    local {
+        enabled = true
+        directory = file('.gradle/build-cache')
+        removeUnusedEntriesAfterDays = 30
+    }
+
+    // 远程构建缓存（团队协作时使用，可选）
+    // remote(HttpBuildCache) {
+    //     url = 'https://build-cache.example.com/'
+    //     enabled = false
+    //     push = false
+    //     credentials {
+    //         username = System.getenv('BUILD_CACHE_USER')
+    //         password = System.getenv('BUILD_CACHE_PASSWORD')
+    //     }
+    // }
+}
+
+// ==========================================
+// Gradle Enterprise 配置（高级功能，可选）
+// ==========================================
+
+// 如果使用 Gradle Enterprise 进行构建分析和优化
+// plugins {
+//     id 'com.gradle.enterprise' version '3.16.2'
+// }
+//
+// gradleEnterprise {
+//     buildScan {
+//         termsOfServiceUrl = 'https://gradle.com/terms-of-service'
+//         termsOfServiceAgree = 'yes'
+//         publishAlways()
+//     }
+// }
+
+// ==========================================
+// 特性预览（启用实验性 Gradle 功能，可选）
+// ==========================================
+
+// enableFeaturePreview('TYPESAFE_PROJECT_ACCESSORS')
+// enableFeaturePreview('VERSION_CATALOGS')
+// enableFeaturePreview('STABLE_CONFIGURATION_CACHE')
+
+// ==========================================
+// 开发者信息输出
+// ==========================================
+
+gradle.projectsLoaded {
+    println """
+    ==========================================
+    Eclipse Canticle Mod - Gradle Settings
+    ==========================================
+    Root Project: ${rootProject.name}
+    Gradle Version: ${gradle.gradleVersion}
+    Java Version: ${System.getProperty('java.version')}
+    OS: ${System.getProperty('os.name')} ${System.getProperty('os.version')}
+    ==========================================
+    """
+}
+
+// ==========================================
+// 注意事项
+// ==========================================
+/*
+ * 1. 这个文件主要用于配置项目级别的设置
+ * 2. 插件和依赖的具体配置在 build.gradle 中
+ * 3. 如果项目是单模块的（目前是），保持简单即可
+ * 4. 构建缓存可以显著提高增量构建速度
+ * 5. 多模块配置在项目扩大时再考虑添加
+ */
