@@ -81,7 +81,7 @@ Only by defeating this god can you return to the town where your journey began, 
 
 ### 🎯 Development Status
 
-**Current Version:** 0.1.0-alpha  
+**Current Version:** 0.0.1-0001-alpha  
 **Started:** November 7, 2025  
 **Primary Target:** Minecraft 1.20.1  
 **Future Targets:** 1.21.x, 1.22.x
@@ -144,7 +144,7 @@ As this is a solo development project, I'm currently not accepting code contribu
 - 📝 Providing feedback and testing
 - 🌍 Helping with translations
 
-Please use the email to report the problem
+Please use the email to report the problem or https://github.com/YunMu-MC/Eclipse-Canticle/issues
 ### 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
@@ -152,7 +152,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ### 🔗 Links
 
 - **GitHub:** [https://github.com/YunMu-MC/Eclipse-Canticle](https://github.com/YunMu-MC/Eclipse-Canticle)
-- **Issues:** Please use the email to report the problem
+- **Issues:** https://github.com/YunMu-MC/Eclipse-Canticle/issues
 - **Modrinth:** Coming Soon
 - **CurseForge:** Coming Soon
 
@@ -225,7 +225,7 @@ Or use an email address:yunmuecan@163.cm
 
 ### 🎯 开发状态
 
-**当前版本：** 0.1.0-alpha  
+**当前版本：** 0.0.1-0001-alpha  
 **开始日期：** 2025年11月7日  
 **主要目标版本：** Minecraft 1.20.1  
 **未来目标版本：** 1.21.x, 1.22.x
@@ -288,7 +288,7 @@ cd eclipse-canticle
 - 📝 提供反馈和测试
 - 🌍 帮助翻译
 
-请在邮箱提交问题。
+请在邮箱提交问题或 https://github.com/YunMu-MC/Eclipse-Canticle/issues
 
 ### 📄 许可证
 
@@ -297,7 +297,7 @@ cd eclipse-canticle
 ### 🔗 链接
 
 - **GitHub：** [https://github.com/YunMu-MC/Eclipse-Canticle](https://github.com/YunMu-MC/Eclipse-Canticle)
-- **问题反馈：** 请使用邮箱
+- **问题反馈：** https://github.com/YunMu-MC/Eclipse-Canticle/issues
 - **Modrinth：** 即将推出
 - **CurseForge：** 即将推出
 
